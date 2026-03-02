@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+
+
+<style>
+
+
+
+:root{
+
+  --fmf-blue:#1e3a8a;
+
+  --fmf-light:#eaf2ff;
+
+  --fmf-border:#dbeafe;
+
+  --path-red:#dc2626;
+
+  --path-yellow:#ca8a04;
+
+  --path-orange:#ea580c;
+
+  --text-soft:#6b7280;
+
+}
+
+
+
+body{
+
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+
+  background:#ffffff;
+
+  padding:24px;
+
+  max-width:520px;
+
+  margin:auto;
+
+  color:#1f2937;
+
+}
+
+
+
+h1{
+
+  font-size:20px;
+
+  font-weight:600;
+
+  margin-bottom:28px;
+
+  color:var(--fmf-blue);
+
+}
+
+
+
+.section{margin-bottom:26px;}
+
+
+
+label{
+
+  font-size:12px;
+
+  text-transform:uppercase;
+
+  color:var(--text-soft);
+
+  display:block;
+
+  margin-bottom:6px;
+
+  letter-spacing:0.5px;
+
+}
+
+
+
+.row{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:16px;
+
+}
+
+
+
+.row input{
+
+  flex:1;
+
+  border:none;
+
+  border-bottom:1px solid var(--fmf-border);
+
+  padding:8px 4px;
+
+  font-size:16px;
+
+  background:white;
+
+  outline:none;
+
+  transition:0.2s;
+
+}
+
+
+
+.row input:focus{
+
+  border-bottom:2px solid var(--fmf-blue);
+
+}
+
+
+
+.result{
+
+  min-width:150px;
+
+  text-align:right;
+
+  font-size:14px;
+
+  font-weight:500;
+
+  color:var(--text-soft);
+
+  position:relative;
+
+}
+
+
+
+.result.red{ color:var(--path-red); }
+
+.result.yellow{ color:var(--path-yellow); }
+
+.result.orange{ color:var(--path-orange); }
+
+
+
+.result::after{
+
+  content:attr(data-z);
+
+  position:absolute;
+
+  right:0;
+
+  top:120%;
+
+  background:var(--fmf-blue);
+
+  color:white;
+
+  font-size:12px;
+
+  padding:4px 8px;
+
+  border-radius:4px;
+
+  white-space:nowrap;
+
+  opacity:0;
+
+  transform:translateY(-4px);
+
+  transition:0.2s;
+
+  pointer-events:none;
+
+}
+
+
+
+.result:hover::after{
+
+  opacity:1;
+
+  transform:translateY(0);
+
+}
+
+
+
+.divider{
+
+  height:1px;
+
+  background:var(--fmf-border);
+
+  margin:28px 0;
+
+}
+
+
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<h1>Prenatal Biometry</h1>
+
+
+
+<div class="section">
+
+<label>Gestational Age</label>
+
+<div class="row">
+
+<input id="weeks" type="number" placeholder="Weeks" min="14" max="41">
+
+<input id="days" type="number" placeholder="Days (0–6)" min="0" max="6">
+
+</div>
+
+</div>
+
+
+
+<div class="divider"></div>
+
+
+
+<div class="section">
+
+<label>BPD (mm)</label>
+
+<div class="row">
+
+<input id="bpd">
+
+<div id="bpd_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="section">
+
+<label>HC (mm)</label>
+
+<div class="row">
+
+<input id="hc">
+
+<div id="hc_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="section">
+
+<label>AC (mm)</label>
+
+<div class="row">
+
+<input id="ac">
+
+<div id="ac_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="section">
+
+<label>FL (mm)</label>
+
+<div class="row">
+
+<input id="fl">
+
+<div id="fl_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="divider"></div>
+
+
+
+<div class="section">
+
+<label>EFW (Hadlock-3)</label>
+
+<div class="row">
+
+<input id="efw" readonly>
+
+<div id="efw_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="section">
+
+<label>Or enter EFW manually</label>
+
+<div class="row">
+
+<input id="efw_manual">
+
+<div id="efw_manual_res" class="result"></div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+
+/* ===============================
+
+   CORE MATH
+
+   =============================== */
+
+
+
+function gaInWeeks(w,d){ return w + d/7; }
+
+
+
+function erf(x){
+
+  const sign=x>=0?1:-1;
+
+  x=Math.abs(x);
+
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741;
+
+  const a4=-1.453152027,a5=1.061405429,p=0.3275911;
+
+  const t=1/(1+p*x);
+
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+
+  return sign*y;
+
+}
+
+
+
+function normalCDF(z){ return 0.5*(1+erf(z/Math.SQRT2)); }
+
+function percentile(z){ return +(normalCDF(z)*100).toFixed(2); }
+
+
+
+/* ===============================
+
+   BIOMETRY (Normal model)
+
+   =============================== */
+
+
+
+function meanHC(g){ return -28.2849+1.69267*g**2-0.397485*g**2*Math.log(g); }
+
+function sdHC(g){ return 1.98735+0.0136772*g**3-0.00726264*g**3*Math.log(g)+0.000976253*g**3*Math.log(g)**2; }
+
+
+
+function meanBPD(g){ return 5.60878+0.158369*g**2-0.00256379*g**3; }
+
+function sdBPD(g){ return Math.exp(0.101242+0.00150557*g**3-0.000771535*g**3*Math.log(g)+0.0000999638*g**3*Math.log(g)**2); }
+
+
+
+function meanAC(g){ return -81.3243+11.6772*g-0.000561865*g**3; }
+
+function sdAC(g){ return -4.36302+0.121445*g**2-0.0130256*g**3+0.00282143*g**3*Math.log(g); }
+
+
+
+function meanFL(g){ return -39.9616+4.32298*g-0.0380156*g**2; }
+
+function sdFL(g){ return Math.exp(0.605843-42.0014*g**(-2)+0.00000917972*g**3); }
+
+
+
+/* ===============================
+
+   HADLOCK-3
+
+   =============================== */
+
+
+
+function calculateEFW_Hadlock3(HC, AC, FL) {
+
+
+
+  if(!HC || !AC || !FL) return null;
+
+
+
+  const HCcm = HC / 10;
+
+  const ACcm = AC / 10;
+
+  const FLcm = FL / 10;
+
+
+
+  const log10EFW =
+
+      1.326
+
+    - 0.00326 * ACcm * FLcm
+
+    + 0.0107 * HCcm
+
+    + 0.0438 * ACcm
+
+    + 0.158  * FLcm;
+
+
+
+  const EFW = Math.pow(10, log10EFW);
+
+
+
+  return +EFW.toFixed(0);
+
+}
+
+
+
+/* ===============================
+
+   INTERGROWTH EFW (LMS)
+
+   =============================== */
+
+
+
+function lambdaEFW(g){
+
+  const x=g/10;
+
+  return 9.43643+9.41579*x**(-2)-83.54220*Math.log(x)*x**(-2);
+
+}
+
+
+
+function muEFW(g){
+
+  return -2.42272+1.86478*Math.sqrt(g)-1.93299e-5*g**3;
+
+}
+
+
+
+function sigmaEFW(g){
+
+  const x=g/10;
+
+  return 0.0193557+0.0310716*x**(-2)-0.0657587*Math.log(x)*x**(-2);
+
+}
+
+
+
+function zEFW(efw, g){
+
+
+
+  if(!isFinite(efw) || efw <= 0) return NaN;
+
+
+
+  const L = lambdaEFW(g);
+
+  const M = muEFW(g);
+
+  const S = sigmaEFW(g);
+
+
+
+  const Y = Math.log(efw);
+
+
+
+  if(Math.abs(L) < 1e-6){
+
+    return (Y - M) / S;
+
+  }
+
+
+
+  return (Math.pow(Y / M, L) - 1) / (L * S);
+
+}
+
+
+
+/* ===============================
+
+   UI
+
+   =============================== */
+
+
+
+function paint(box,p,z){
+
+  box.className="result";
+
+  if(p<3) box.classList.add("red");
+
+  else if(p<10) box.classList.add("yellow");
+
+  else if(p>90) box.classList.add("orange");
+
+  box.innerText=p+" percentile";
+
+  box.setAttribute("data-z","z-score: "+z.toFixed(2));
+
+}
+
+
+
+function analyze(){
+
+
+
+const wRaw = parseInt(weeks.value);
+
+const dRaw = parseInt(days.value);
+
+
+
+if (isNaN(wRaw)) return;
+
+
+
+const w = wRaw;
+
+const d = isNaN(dRaw) ? 0 : dRaw;
+
+
+
+const g = gaInWeeks(w, d);
+
+
+
+if (!isFinite(g)) return;
+
+
+
+  function compute(val,meanFn,sdFn,res){
+
+    if(!val){res.innerText="";return;}
+
+    const m=meanFn(g);
+
+    const sd=sdFn(g);
+
+    const z=(val-m)/sd;
+
+    const p=percentile(z);
+
+    paint(res,p,z);
+
+  }
+
+
+
+  compute(parseFloat(bpd.value),meanBPD,sdBPD,bpd_res);
+
+  compute(parseFloat(hc.value),meanHC,sdHC,hc_res);
+
+  compute(parseFloat(ac.value),meanAC,sdAC,ac_res);
+
+  compute(parseFloat(fl.value),meanFL,sdFL,fl_res);
+
+
+
+const efwValue = calculateEFW_Hadlock3(
+
+  parseFloat(hc.value),
+
+  parseFloat(ac.value),
+
+  parseFloat(fl.value)
+
+);
+
+
+
+if(efwValue){
+
+  efw.value = efwValue.toFixed(0);
+
+
+
+  const z = zEFW(efwValue, g);
+
+  paint(efw_res, percentile(z), z);
+
+
+
+}else{
+
+  efw.value="";
+
+  efw_res.innerText="";
+
+}
+
+
+
+  const manualValue = parseFloat(efw_manual.value);
+
+
+
+if(!isNaN(manualValue) && manualValue > 0){
+
+  
+
+const z = zEFW(manualValue, g);
+
+  paint(efw_manual_res, percentile(z), z);
+
+
+
+}else{
+
+  efw_manual_res.innerText="";
+
+}
+
+}
+
+
+
+weeks.addEventListener("input",()=>{
+
+  const val = parseInt(weeks.value);
+
+
+
+  if(isNaN(val)) return;
+
+
+
+  if(val < 14) weeks.value = 14;
+
+  if(val > 41) weeks.value = 41;
+
+});
+
+
+
+days.addEventListener("input",()=>{
+
+  if(days.value<0)days.value=0;
+
+  if(days.value>6)days.value=6;
+
+});
+
+
+
+let timeout=null;
+
+function debounce(){
+
+  clearTimeout(timeout);
+
+  timeout=setTimeout(analyze,200);
+
+}
+
+
+
+document.querySelectorAll("input")
+
+  .forEach(i=>i.addEventListener("input",debounce));
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
