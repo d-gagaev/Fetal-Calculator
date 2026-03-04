@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1", maximum-scale=1, user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
@@ -125,6 +125,11 @@ label{
   background:#1e3a8a;
   color:white;
 }
+
+html,body{
+touch-action: manipulation;
+}
+
 </style>
 </head>
 
@@ -300,6 +305,17 @@ function zEFW(efw,g){
 /* ===============================
    UI
 ================================ */
+<<<<<<< HEAD
+
+function paint(box,p,z){
+  box.className="result";
+  if(p<3) box.classList.add("red");
+  else if(p<10) box.classList.add("yellow");
+  else if(p>90) box.classList.add("orange");
+  box.innerText=p+" percentile";
+}
+
+=======
 function validateWeeks(){
   let v = parseInt(weeks.value);
   if(isNaN(v)) return;
@@ -318,6 +334,7 @@ function paint(box,p,z){
   box.innerText=p+" percentile";
 }
 
+>>>>>>> 247e051 (fix)
 function analyze(){
 
   const w=parseInt(weeks.value);
@@ -409,7 +426,8 @@ if(!isMobile){
 /* ===== OPEN KEYBOARD ===== */
 
 inputs.forEach(input=>{
-  input.addEventListener("focus",()=>{
+
+  function openKeyboard(){
 
     activeInput=input;
     if(!isMobile) return;
@@ -432,7 +450,11 @@ inputs.forEach(input=>{
       });
 
     },200);
-  });
+  }
+
+  input.addEventListener("focus",openKeyboard);
+  input.addEventListener("click",openKeyboard);
+
 });
 
 /* ===== KEY INPUT ===== */
@@ -457,10 +479,13 @@ keys.forEach(btn=>{
 
 nextBtn.addEventListener("click",()=>{
   if(!activeInput) return;
+<<<<<<< HEAD
+=======
   
   if(activeInput === weeks){
     validateWeeks();
   }
+>>>>>>> 247e051 (fix)
 
   const index=inputs.indexOf(activeInput);
 
