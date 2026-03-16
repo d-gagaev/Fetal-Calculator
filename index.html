@@ -107,7 +107,10 @@ label{
   margin-bottom:10px;
 }
 
-.kb-grid button,
+.kb-grid button{
+touch-action: manipulation;
+}
+
 .kb-actions button{
   font-size:18px;
   padding:12px;
@@ -414,6 +417,7 @@ const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 let activeInput=null;
 let keyboardHeight=0;
+let replaceOnInput=false;
 
 const keyboard=document.getElementById("customKeyboard");
 const keys=document.querySelectorAll("[data-key]");
@@ -427,6 +431,7 @@ if(!isMobile){
 function openKeyboard(input){
 
   activeInput=input;
+  replaceOnInput = activeInput.value.length > 0;
 
   if(!isMobile) return;
 
@@ -465,7 +470,9 @@ days.addEventListener("blur",validateDays);
 
 keys.forEach(btn=>{
 
-  btn.addEventListener("click",()=>{
+  btn.addEventListener("pointerdown",(e)=>{
+    
+    e.preventDefault();
 
     if(!activeInput) return;
 
@@ -474,9 +481,15 @@ keys.forEach(btn=>{
     if(key==="back"){
 
       activeInput.value=activeInput.value.slice(0,-1);
+      replaceOnInput=false;
 
     }else{
       if(key==="." && activeInput.value.includes(".")) return;
+      if(replaceOnInput){
+        activeInput.value="";
+        replaceOnInput=false;
+      }
+      
       activeInput.value+=key;
 
     }
@@ -490,7 +503,8 @@ keys.forEach(btn=>{
 
 /* ===== NEXT / DONE ===== */
 
-nextBtn.addEventListener("click",()=>{
+nextBtn.addEventListener("pointerdown",(e)=>{
+  e.preventDefault();
 
   if(!activeInput) return;
 
