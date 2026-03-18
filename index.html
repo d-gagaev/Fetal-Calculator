@@ -411,6 +411,8 @@ function analyze(){
 
     paint(efw_manual_res,percentile(z),z);
 
+  }else{
+    efw_manual_res.innerText="";
   }
 
 }
@@ -433,6 +435,15 @@ const keyboard=document.getElementById("customKeyboard");
 const keys=document.querySelectorAll("[data-key]");
 const nextBtn=document.getElementById("kbNext");
 const inputs=[weeks,days,bpd,hc,ac,fl,efw_manual];
+const inputLimits = {
+  weeks: {int:2, dec:0},
+  days: {int:1, dec:0},
+  bpd: {int:3, dec:1},
+  hc: {int:3, dec:1},
+  ac: {int:3, dec:1},
+  fl: {int:2, dec:1},
+  efw_manual: {int:4, dec:0}
+};
 
 if(!isMobile){
   inputs.forEach(i=>i.removeAttribute("readonly"));
@@ -444,7 +455,7 @@ function openKeyboard(input){
   replaceOnInput = activeInput.value.length > 0;
   
   input.focus();
-  
+
   if(!isMobile) return;
 
   keyboard.classList.remove("hidden");
@@ -504,13 +515,36 @@ keys.forEach(btn=>{
       replaceOnInput=false;
 
     }else{
-      if(key==="." && activeInput.value.includes(".")) return;
+      if(key === "."){
+        if(activeInput === weeks || activeInput === days) return;
+        if(activeInput.value.includes(".")) return;
+      }
       if(replaceOnInput){
         activeInput.value="";
         replaceOnInput=false;
       }
       
-      activeInput.value+=key;
+      const limits = inputLimits[activeInput.id];
+
+      if(limits){
+
+        let value = activeInput.value;
+
+        if(value.includes(".")){
+
+          let [intPart, decPart] = value.split(".");
+
+          if(key !== "." && decPart.length >= limits.dec) return;
+
+        }else{
+
+          if(key !== "." && value.length >= limits.int) return;
+
+        }
+
+      }
+
+      activeInput.value += key;
 
     }
 
@@ -592,7 +626,7 @@ if(window.visualViewport){
 
   visualViewport.addEventListener("resize", ()=>{
 
-    const keyboardHeight =
+    keyboardHeight =
       window.innerHeight - visualViewport.height;
 
     if(keyboardHeight > 0){
@@ -605,6 +639,8 @@ if(window.visualViewport){
   });
 
 }
+
+openKeyboard(weeks)
 
 </script>
 </body>
