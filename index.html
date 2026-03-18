@@ -375,24 +375,25 @@ function analyze(){
   compute(parseFloat(ac.value),meanAC,sdAC,ac_res);
   compute(parseFloat(fl.value),meanFL,sdFL,fl_res);
 
-  const efwValue=calculateEFW_Hadlock3(
-    parseFloat(hc.value),
-    parseFloat(ac.value),
-    parseFloat(fl.value)
-  );
+  
+  const HC = parseFloat(hc.value);
+  const AC = parseFloat(ac.value);
+  const FL = parseFloat(fl.value);
 
-  if(efwValue){
+  if(HC && AC && FL){
 
-    efw.value=efwValue;
+    const efwValue = calculateEFW_Hadlock3(HC, AC, FL);
+
+    efw.value = efwValue;
 
     if(g){
-
-      const z=zEFW(efwValue,g);
-
+      const z = zEFW(efwValue,g);
       paint(efw_res,percentile(z),z);
-
     }
-
+    
+  }else{
+    efw.value = "";
+    efw_res.innerText = "";
   }
 
   const manual=parseFloat(efw_manual.value);
@@ -459,8 +460,10 @@ function openKeyboard(input){
 
 inputs.forEach(input=>{
 
-  input.addEventListener("focus",()=>openKeyboard(input));
-  input.addEventListener("click",()=>openKeyboard(input));
+  input.addEventListener("pointerdown",(e)=>{
+    e.preventDefault();
+    openKeyboard(input);
+  }  
 
 });
 
@@ -482,7 +485,7 @@ keys.forEach(btn=>{
 
     if(key==="back"){
 
-      activeInput.value=activeInput.value.slice(0,-1);
+      activeInput.value="";
       replaceOnInput=false;
 
     }else{
