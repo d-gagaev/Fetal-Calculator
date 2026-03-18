@@ -560,7 +560,8 @@ keys.forEach(btn=>{
 
 /* ===== NEXT / DONE ===== */
 
-nextBtn.addEventListener("pointerdown",()=>{
+nextBtn.addEventListener("pointerdown",(e)=>{
+  e.preventDefault();
 
   if(!activeInput) return;
 
@@ -655,8 +656,6 @@ if(window.visualViewport){
   });
 
 }
-
-openKeyboard(weeks)
 
 </script>
 </body>
