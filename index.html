@@ -23,6 +23,9 @@ body{
   max-width:520px;
   margin:auto;
   color:#1f2937;
+
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
 h1{
@@ -572,10 +575,24 @@ nextBtn.addEventListener("pointerdown",(e)=>{
     replaceOnInput = nextInput.value.length > 0;
     nextInput.focus();
 
-    nextInput.scrollIntoView({
-      behavior:"smooth",
-      block:"center"
-    });
+    setTimeout(()=>{
+
+      const rect = nextInput.getBoundingClientRect();
+
+      const viewportHeight = visualViewport
+        ? visualViewport.height
+        : window.innerHeight;
+
+      const overlap = rect.bottom - (viewportHeight - keyboardHeight);
+
+      if(overlap > 0){
+        window.scrollBy({
+          top: overlap + 30,
+          behavior: "smooth"
+        });
+      }
+
+    },150);
 
   }else{
 
