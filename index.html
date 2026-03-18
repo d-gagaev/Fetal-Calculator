@@ -465,13 +465,13 @@ function openKeyboard(input){
   setTimeout(()=>{
 
     const rect = input.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
+    const viewportHeight = visualViewport ? visualViewport.height : window.innerHeight;
 
     const overlap = rect.bottom - (viewportHeight - keyboardHeight);
 
     if(overlap > 0){
       window.scrollBy({
-        top: overlap + 20,
+        top: overlap + 30,
         behavior: "smooth"
       });
     }
