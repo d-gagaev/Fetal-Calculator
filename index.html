@@ -485,7 +485,7 @@ keys.forEach(btn=>{
 
     if(key==="back"){
 
-      activeInput.value="";
+      activeInput.value=activeInput.value.slice(0,-1);
       replaceOnInput=false;
 
     }else{
