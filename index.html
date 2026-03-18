@@ -442,7 +442,9 @@ function openKeyboard(input){
 
   activeInput=input;
   replaceOnInput = activeInput.value.length > 0;
-
+  
+  input.focus();
+  
   if(!isMobile) return;
 
   keyboard.classList.remove("hidden");
