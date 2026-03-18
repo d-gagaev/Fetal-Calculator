@@ -145,6 +145,11 @@ html{;
   overflow-y:auto;
 }
 
+#bottomSpacer{
+  height:0px;
+  transition:height 0.2s;
+}
+
 </style>
 </head>
 
@@ -641,16 +646,17 @@ document.addEventListener("click",(e)=>{
 
 if(window.visualViewport){
 
+  const spacer = document.getElementById("bottomSpacer");
+
   visualViewport.addEventListener("resize", ()=>{
 
     keyboardHeight =
       window.innerHeight - visualViewport.height;
 
     if(keyboardHeight > 0){
-      document.body.style.paddingBottom =
-        keyboardHeight + 40 + "px";
+      spacer.style.height = (keyboardHeight + 120) + "px";
     }else{
-      document.body.style.paddingBottom = "24px";
+      spacer.style.height = "0px";
     }
 
   });
@@ -658,5 +664,6 @@ if(window.visualViewport){
 }
 
 </script>
+<div id="bottomSpacer"></div>
 </body>
 </html>
