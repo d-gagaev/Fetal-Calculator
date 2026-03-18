@@ -439,6 +439,7 @@ let keyboardHeight=0;
 let replaceOnInput=false;
 
 const keyboard=document.getElementById("customKeyboard");
+const spacer=document.getElementById("bottomSpacer");
 const keys=document.querySelectorAll("[data-key]");
 const nextBtn=document.getElementById("kbNext");
 const inputs=[weeks,days,bpd,hc,ac,fl,efw_manual];
@@ -622,7 +623,8 @@ function closeKeyboard(){
 
   keyboard.classList.add("hidden");
 
-  document.body.style.paddingBottom="24px";
+  spacer.style.height = "0px";
+  keyboardHeight = 0;
 
   activeInput=null;
 
