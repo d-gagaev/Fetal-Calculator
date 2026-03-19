@@ -478,7 +478,7 @@ function openKeyboard(input){
 
     if(overlap > 0){
       window.scrollBy({
-        top: overlap + 30,
+        top: overlap + 20,
         behavior: "smooth"
       });
     }
@@ -594,7 +594,7 @@ nextBtn.addEventListener("pointerdown",(e)=>{
 
       if(overlap > 0){
         window.scrollBy({
-          top: overlap + 30,
+          top: overlap + 20,
           behavior: "smooth"
         });
       }
@@ -650,11 +650,10 @@ if(window.visualViewport){
 
   visualViewport.addEventListener("resize", ()=>{
 
-    keyboardHeight =
-      window.innerHeight - visualViewport.height;
+    keyboardHeight = window.innerHeight - visualViewport.height;
 
     if(keyboardHeight > 0){
-      spacer.style.height = (keyboardHeight + 120) + "px";
+      spacer.style.height = keyboardHeight + "px";
     }else{
       spacer.style.height = "0px";
     }
