@@ -592,7 +592,7 @@ nextBtn.addEventListener("pointerdown",(e)=>{
   if(activeInput === weeks){
     validateWeeks();
   }
-
+  haptic("medium");
   const index=inputs.indexOf(activeInput);
 
   if(index<inputs.length-1){
