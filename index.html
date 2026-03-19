@@ -237,6 +237,25 @@ html{
 
 <script>
 
+function haptic(type="light"){
+
+  // Telegram Mini App
+  if(window.Telegram?.WebApp?.HapticFeedback){
+    if(type==="light") Telegram.WebApp.HapticFeedback.impactOccurred("light");
+    if(type==="medium") Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+    if(type==="heavy") Telegram.WebApp.HapticFeedback.impactOccurred("heavy");
+    return;
+  }
+
+  // Android / PWA vibration
+  if(navigator.vibrate){
+    if(type==="light") navigator.vibrate(10);
+    if(type==="medium") navigator.vibrate(20);
+    if(type==="heavy") navigator.vibrate(30);
+  }
+
+}
+
 /* ===============================
    CORE MATH
 ================================ */
