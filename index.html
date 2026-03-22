@@ -67,6 +67,10 @@ label{
   border-bottom:2px solid var(--fmf-blue);
 }
 
+.row input.active-field{
+  border-bottom:2px solid var(--fmf-blue);
+}
+
 .result{
   min-width:150px;
   text-align:right;
@@ -507,9 +511,16 @@ function ensureVisible(input){
   });
 }
 
+function setActiveField(input){
+  inputs.forEach(i => i.classList.remove("active-field"));
+  if(input) input.classList.add("active-field");
+}
+
 function openKeyboard(input){
-  activeInput=input;
-  replaceOnInput = input.value.length > 0;
+
+  activeInput = input;
+  replaceOnInput = activeInput.value.length > 0;
+  setActiveField(input);
 
   if(!isMobile){
     input.focus();
@@ -519,13 +530,11 @@ function openKeyboard(input){
   keyboard.classList.remove("hidden");
   nextBtn.innerText = (input===efw_manual) ? "Done" : "Next";
 
-  updateSpacer();
-
-  input.focus();
+  updateKeyboardSpace();
 
   setTimeout(()=>{
     ensureVisible(input);
-  },50);
+  }, 50);
 }
 
 function closeKeyboard(){
@@ -536,6 +545,7 @@ function closeKeyboard(){
   spacer.style.height = "0px";
   activeInput = null;
   replaceOnInput = false;
+  setActiveField(null);
 }
 
 inputs.forEach(input=>{
@@ -613,17 +623,24 @@ nextBtn.addEventListener("pointerdown",(e)=>{
 
     activeInput = nextInput;
     replaceOnInput = nextInput.value.length > 0;
+    setActiveField(nextInput);
+
+    if(!isMobile){
+      nextInput.focus();
+    }
+
     nextBtn.innerText = (nextInput===efw_manual) ? "Done" : "Next";
 
-    nextInput.focus();
-    updateSpacer();
+    updateKeyboardSpace();
 
     setTimeout(()=>{
       ensureVisible(nextInput);
-    },50);
+    }, 50);
+
   }else{
     closeKeyboard();
   }
+
 });
 
 document.addEventListener("pointerdown",(e)=>{
