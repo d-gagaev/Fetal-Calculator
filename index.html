@@ -374,9 +374,11 @@ function paint(box,p,z){
   else if(p<10) box.classList.add("yellow");
   else if(p>90) box.classList.add("orange");
 
+  const zText = isFinite(z) ? z.toFixed(2) : "—";
+
   box.innerHTML = `
     <div>${p} percentile</div>
-    <div class="zscore">z = ${z.toFixed(2)}</div>
+    <div class="zscore">z = ${zText}</div>
   `;
 }
 
