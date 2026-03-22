@@ -486,11 +486,16 @@ function getKeyboardHeight(){
   return keyboard.offsetHeight || 0;
 }
 
-function updateSpacer(){
+function updateKeyboardSpace(){
   if(!isMobile) return;
-  spacer.style.height = keyboard.classList.contains("hidden")
-    ? "0px"
-    : getKeyboardHeight() + "px";
+
+  if(keyboard.classList.contains("hidden")){
+    spacer.style.height = "0px";
+    return;
+  }
+
+  const h = getKeyboardHeight();
+  spacer.style.height = (h + 12) + "px";
 }
 
 function ensureVisible(input){
@@ -498,13 +503,18 @@ function ensureVisible(input){
 
   requestAnimationFrame(()=>{
     const rect = input.getBoundingClientRect();
-    const kbTop = window.innerHeight - getKeyboardHeight();
-    const targetBottom = kbTop - 8;
-    const overlap = rect.bottom - targetBottom;
+    const keyboardTop = window.innerHeight - getKeyboardHeight();
+    const safeBottom = keyboardTop - 12;
+    const safeTop = 12;
 
-    if(overlap > 0){
+    if(rect.bottom > safeBottom){
       window.scrollBy({
-        top: overlap,
+        top: rect.bottom - safeBottom,
+        behavior: "smooth"
+      });
+    }else if(rect.top < safeTop){
+      window.scrollBy({
+        top: rect.top - safeTop,
         behavior: "smooth"
       });
     }
@@ -533,8 +543,13 @@ function openKeyboard(input){
   updateKeyboardSpace();
 
   setTimeout(()=>{
+    updateKeyboardSpace();
     ensureVisible(input);
   }, 50);
+
+  setTimeout(()=>{
+    ensureVisible(input);
+  }, 180);
 }
 
 function closeKeyboard(){
@@ -603,6 +618,10 @@ keys.forEach(btn=>{
 
     activeInput.dispatchEvent(new Event("input"));
     ensureVisible(activeInput);
+
+    setTimeout(()=>{
+      ensureVisible(activeInput);
+    }, 80);
   });
 });
 
@@ -634,8 +653,13 @@ nextBtn.addEventListener("pointerdown",(e)=>{
     updateKeyboardSpace();
 
     setTimeout(()=>{
+      updateKeyboardSpace();
       ensureVisible(nextInput);
     }, 50);
+
+    setTimeout(()=>{
+      ensureVisible(nextInput);
+    }, 180);
 
   }else{
     closeKeyboard();
