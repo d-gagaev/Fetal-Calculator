@@ -86,6 +86,12 @@ label{
   margin:28px 0;
 }
 
+.zscore{
+  font-size:12px;
+  margin-top:3px;
+  opacity:0.8;
+}
+
 /* ===== Keyboard ===== */
 
 .keyboard{
@@ -368,7 +374,10 @@ function paint(box,p,z){
   else if(p<10) box.classList.add("yellow");
   else if(p>90) box.classList.add("orange");
 
-  box.innerText=p+" percentile";
+  box.innerHTML = `
+    <div>${p} percentile</div>
+    <div class="zscore">z = ${z.toFixed(2)}</div>
+  `;
 }
 
 function analyze(){
@@ -550,7 +559,9 @@ keys.forEach(btn=>{
         activeInput.value="";
         replaceOnInput=false;
       }
-
+      if(activeInput.value === "" && key === "0"){
+        return;
+      }
       const limits = inputLimits[activeInput.id];
 
       if(limits){
