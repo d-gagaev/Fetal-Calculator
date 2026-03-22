@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1", maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
@@ -20,11 +20,9 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   background:#ffffff;
   padding:24px;
-
   max-width:520px;
   margin:auto;
   color:#1f2937;
-
   min-height:100vh;
   overflow-y:auto;
   overflow-x:hidden;
@@ -100,7 +98,7 @@ label{
   box-shadow:0 -6px 20px rgba(0,0,0,0.15);
   border-top-left-radius:16px;
   border-top-right-radius:16px;
-  ;
+  z-index:9999;
 }
 
 .hidden{ display:none; }
@@ -132,11 +130,11 @@ label{
 }
 
 .kb-grid button{
-touch-action: manipulation;
+  touch-action:manipulation;
 }
 
 html,body{
-touch-action: pan-y;
+  touch-action:pan-y;
 }
 
 html{
@@ -147,7 +145,6 @@ html{
 #bottomSpacer{
   height:0;
 }
-
 </style>
 </head>
 
@@ -235,11 +232,10 @@ html{
   </div>
 </div>
 
+<div id="bottomSpacer"></div>
+
 <script>
-
 function haptic(type="light"){
-
-  // Telegram Mini App
   if(window.Telegram?.WebApp?.HapticFeedback){
     if(type==="light") Telegram.WebApp.HapticFeedback.impactOccurred("light");
     if(type==="medium") Telegram.WebApp.HapticFeedback.impactOccurred("medium");
@@ -247,13 +243,11 @@ function haptic(type="light"){
     return;
   }
 
-  // Android / PWA vibration
   if(navigator.vibrate){
     if(type==="light") navigator.vibrate(10);
     if(type==="medium") navigator.vibrate(20);
     if(type==="heavy") navigator.vibrate(30);
   }
-
 }
 
 /* ===============================
@@ -346,11 +340,11 @@ function zEFW(efw,g){
 /* ===============================
    UI
 ================================ */
+
 function validateWeeks(){
   let v = parseInt(weeks.value);
-
   if(isNaN(v)) return;
-  
+
   if(v < 14) weeks.value = 14;
   else if(v > 41) weeks.value = 41;
 
@@ -359,15 +353,13 @@ function validateWeeks(){
 
 function validateDays(){
   let v = parseInt(days.value);
-
   if(isNaN(v)) return;
-  
+
   if(v < 0) days.value = 0;
   else if(v > 6) days.value = 6;
 
   days.dispatchEvent(new Event("input"));
 }
-
 
 function paint(box,p,z){
   box.className="result";
@@ -380,7 +372,6 @@ function paint(box,p,z){
 }
 
 function analyze(){
-
   const w=parseInt(weeks.value);
   const d=parseInt(days.value)||0;
 
@@ -391,14 +382,12 @@ function analyze(){
   }
 
   function compute(val,meanFn,sdFn,res){
-
     if(!val || !g){
       res.innerText="";
       return;
     }
 
     const z=(val-meanFn(g))/sdFn(g);
-
     paint(res,percentile(z),z);
   }
 
@@ -407,22 +396,18 @@ function analyze(){
   compute(parseFloat(ac.value),meanAC,sdAC,ac_res);
   compute(parseFloat(fl.value),meanFL,sdFL,fl_res);
 
-  
   const HC = parseFloat(hc.value);
   const AC = parseFloat(ac.value);
   const FL = parseFloat(fl.value);
 
   if(HC && AC && FL){
-
     const efwValue = calculateEFW_Hadlock3(HC, AC, FL);
-
     efw.value = efwValue;
 
     if(g){
       const z = zEFW(efwValue,g);
       paint(efw_res,percentile(z),z);
     }
-    
   }else{
     efw.value = "";
     efw_res.innerText = "";
@@ -431,20 +416,15 @@ function analyze(){
   const manual=parseFloat(efw_manual.value);
 
   if(manual>0 && g){
-
     const z=zEFW(manual,g);
-
     paint(efw_manual_res,percentile(z),z);
-
   }else{
     efw_manual_res.innerText="";
   }
-
 }
 
 document.querySelectorAll("input")
 .forEach(i=>i.addEventListener("input",analyze));
-
 
 /* ===============================
    KEYBOARD
@@ -453,7 +433,6 @@ document.querySelectorAll("input")
 const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 let activeInput=null;
-let keyboardHeight=0;
 let replaceOnInput=false;
 
 const keyboard=document.getElementById("customKeyboard");
@@ -461,6 +440,7 @@ const spacer=document.getElementById("bottomSpacer");
 const keys=document.querySelectorAll("[data-key]");
 const nextBtn=document.getElementById("kbNext");
 const inputs=[weeks,days,bpd,hc,ac,fl,efw_manual];
+
 const inputLimits = {
   weeks: {int:2, dec:0},
   days: {int:1, dec:0},
@@ -471,20 +451,20 @@ const inputLimits = {
   efw_manual: {int:4, dec:0}
 };
 
-function updateKeyboardSpace(){
+if(!isMobile){
+  inputs.forEach(i=>i.removeAttribute("readonly"));
+}
+
+function getKeyboardHeight(){
+  if(keyboard.classList.contains("hidden")) return 0;
+  return keyboard.offsetHeight || 0;
+}
+
+function updateSpacer(){
   if(!isMobile) return;
-
-  const isOpen = !keyboard.classList.contains("hidden");
-
-  if(isOpen){
-    const kbRect = keyboard.getBoundingClientRect();
-    const kbHeight = window.innerHeight - kbRect.top;
-    keyboardHeight = kbHeight;
-    spacer.style.height = (kbHeight + 24) + "px";
-  }else{
-    keyboardHeight = 0;
-    spacer.style.height = "0px";
-  }
+  spacer.style.height = keyboard.classList.contains("hidden")
+    ? "0px"
+    : getKeyboardHeight() + "px";
 }
 
 function ensureVisible(input){
@@ -492,9 +472,9 @@ function ensureVisible(input){
 
   requestAnimationFrame(()=>{
     const rect = input.getBoundingClientRect();
-    const kbRect = keyboard.getBoundingClientRect();
-    const safeBottom = kbRect.top - 12; // желаемый зазор 12px
-    const overlap = rect.bottom - safeBottom;
+    const kbTop = window.innerHeight - getKeyboardHeight();
+    const targetBottom = kbTop - 8;
+    const overlap = rect.bottom - targetBottom;
 
     if(overlap > 0){
       window.scrollBy({
@@ -505,53 +485,51 @@ function ensureVisible(input){
   });
 }
 
-if(!isMobile){
-  inputs.forEach(i=>i.removeAttribute("readonly"));
-}
-
 function openKeyboard(input){
-
   activeInput=input;
-  replaceOnInput = activeInput.value.length > 0;
-  
-  input.focus();
+  replaceOnInput = input.value.length > 0;
 
-  if(!isMobile) return;
+  if(!isMobile){
+    input.focus();
+    return;
+  }
 
   keyboard.classList.remove("hidden");
   nextBtn.innerText = (input===efw_manual) ? "Done" : "Next";
 
-  updateKeyboardSpace();
+  updateSpacer();
+
+  input.focus();
 
   setTimeout(()=>{
     ensureVisible(input);
-  }, 50);
+  },50);
+}
 
+function closeKeyboard(){
+  if(activeInput === weeks) validateWeeks();
+  if(activeInput === days) validateDays();
+
+  keyboard.classList.add("hidden");
+  spacer.style.height = "0px";
+  activeInput = null;
+  replaceOnInput = false;
 }
 
 inputs.forEach(input=>{
-
   input.addEventListener("pointerdown",(e)=>{
-    
     if(isMobile){
       e.preventDefault();
       openKeyboard(input);
     }
-    
-  });  
-
+  });
 });
 
 weeks.addEventListener("blur",validateWeeks);
 days.addEventListener("blur",validateDays);
 
-
-/* ===== KEY INPUT ===== */
-
 keys.forEach(btn=>{
-
   btn.addEventListener("pointerdown",(e)=>{
-    
     e.preventDefault();
 
     if(!activeInput) return;
@@ -560,62 +538,50 @@ keys.forEach(btn=>{
     haptic("light");
 
     if(key==="back"){
-
       activeInput.value=activeInput.value.slice(0,-1);
       replaceOnInput=false;
-
     }else{
       if(key === "."){
         if(activeInput === weeks || activeInput === days) return;
         if(activeInput.value.includes(".")) return;
       }
+
       if(replaceOnInput){
         activeInput.value="";
         replaceOnInput=false;
       }
-      
+
       const limits = inputLimits[activeInput.id];
 
       if(limits){
-
         let value = activeInput.value;
 
         if(value.includes(".")){
-
           let [intPart, decPart] = value.split(".");
-
           if(key !== "." && decPart.length >= limits.dec) return;
-
         }else{
-
           if(key !== "." && value.length >= limits.int) return;
-
         }
-
       }
 
       activeInput.value += key;
-
     }
 
     activeInput.dispatchEvent(new Event("input"));
-
+    ensureVisible(activeInput);
   });
-
 });
-
-
-/* ===== NEXT / DONE ===== */
 
 nextBtn.addEventListener("pointerdown",(e)=>{
   e.preventDefault();
 
   if(!activeInput) return;
 
-  if(activeInput === weeks){
-    validateWeeks();
-  }
   haptic("medium");
+
+  if(activeInput === weeks) validateWeeks();
+  if(activeInput === days) validateDays();
+
   const index=inputs.indexOf(activeInput);
 
   if(index<inputs.length-1){
@@ -623,52 +589,29 @@ nextBtn.addEventListener("pointerdown",(e)=>{
 
     activeInput = nextInput;
     replaceOnInput = nextInput.value.length > 0;
-    nextInput.focus();
     nextBtn.innerText = (nextInput===efw_manual) ? "Done" : "Next";
 
-    updateKeyboardSpace();
+    nextInput.focus();
+    updateSpacer();
 
     setTimeout(()=>{
       ensureVisible(nextInput);
-    }, 50);
-
+    },50);
   }else{
-
     closeKeyboard();
-  }  
+  }
 });
 
-
-/* ===== CLOSE ===== */
-
-function closeKeyboard(){
-
-  if(activeInput === weeks) validateWeeks();
-  if(activeInput === days) validateDays();
-
-  keyboard.classList.add("hidden");
-  activeInput = null;
-  replaceOnInput = false;
-
-  updateKeyboardSpace();
-}
-
-document.addEventListener("click",(e)=>{
-
+document.addEventListener("pointerdown",(e)=>{
   if(!isMobile) return;
 
   const clickedInput=inputs.includes(e.target);
   const clickedKeyboard=keyboard.contains(e.target);
 
   if(!clickedInput && !clickedKeyboard){
-
     closeKeyboard();
-
   }
-
 });
-
 </script>
-<div id="bottomSpacer"></div>
 </body>
 </html>
