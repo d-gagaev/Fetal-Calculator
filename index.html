@@ -122,6 +122,13 @@ label{
 
 .hidden{ display:none; }
 
+.keyboard,
+.kb-grid,
+.kb-actions,
+.keyboard *{
+  touch-action:none;
+}
+
 .kb-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -471,6 +478,11 @@ let activeInput=null;
 let replaceOnInput=false;
 
 const keyboard=document.getElementById("customKeyboard");
+["touchstart","touchmove","touchend"].forEach(eventName=>{
+  keyboard.addEventListener(eventName,(e)=>{
+    e.preventDefault();
+  }, { passive:false });
+});
 const spacer=document.getElementById("bottomSpacer");
 const keys=document.querySelectorAll("[data-key]");
 const nextBtn=document.getElementById("kbNext");
