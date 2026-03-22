@@ -471,6 +471,40 @@ const inputLimits = {
   efw_manual: {int:4, dec:0}
 };
 
+function updateKeyboardSpace(){
+  if(!isMobile) return;
+
+  const isOpen = !keyboard.classList.contains("hidden");
+
+  if(isOpen){
+    const kbRect = keyboard.getBoundingClientRect();
+    const kbHeight = window.innerHeight - kbRect.top;
+    keyboardHeight = kbHeight;
+    spacer.style.height = (kbHeight + 24) + "px";
+  }else{
+    keyboardHeight = 0;
+    spacer.style.height = "0px";
+  }
+}
+
+function ensureVisible(input){
+  if(!isMobile || !input) return;
+
+  requestAnimationFrame(()=>{
+    const rect = input.getBoundingClientRect();
+    const kbRect = keyboard.getBoundingClientRect();
+    const safeBottom = kbRect.top - 12; // желаемый зазор 12px
+    const overlap = rect.bottom - safeBottom;
+
+    if(overlap > 0){
+      window.scrollBy({
+        top: overlap,
+        behavior: "smooth"
+      });
+    }
+  });
+}
+
 if(!isMobile){
   inputs.forEach(i=>i.removeAttribute("readonly"));
 }
@@ -485,24 +519,13 @@ function openKeyboard(input){
   if(!isMobile) return;
 
   keyboard.classList.remove("hidden");
+  nextBtn.innerText = (input===efw_manual) ? "Done" : "Next";
 
-  nextBtn.innerText=(input===efw_manual)?"Done":"Next";
+  updateKeyboardSpace();
 
   setTimeout(()=>{
-
-    const rect = input.getBoundingClientRect();
-    const viewportHeight = visualViewport ? visualViewport.height : window.innerHeight;
-
-    const overlap = rect.bottom - (viewportHeight - keyboardHeight);
-
-    if(overlap > 0){
-      window.scrollBy({
-        top: overlap + 20,
-        behavior: "smooth"
-      });
-    }
-
-  },250);
+    ensureVisible(input);
+  }, 50);
 
 }
 
@@ -601,25 +624,13 @@ nextBtn.addEventListener("pointerdown",(e)=>{
     activeInput = nextInput;
     replaceOnInput = nextInput.value.length > 0;
     nextInput.focus();
+    nextBtn.innerText = (nextInput===efw_manual) ? "Done" : "Next";
+
+    updateKeyboardSpace();
 
     setTimeout(()=>{
-
-      const rect = nextInput.getBoundingClientRect();
-
-      const viewportHeight = visualViewport
-        ? visualViewport.height
-        : window.innerHeight;
-
-      const overlap = rect.bottom - (viewportHeight - keyboardHeight);
-
-      if(overlap > 0){
-        window.scrollBy({
-          top: overlap + 20,
-          behavior: "smooth"
-        });
-      }
-
-    },150);
+      ensureVisible(nextInput);
+    }, 50);
 
   }else{
 
@@ -632,21 +643,14 @@ nextBtn.addEventListener("pointerdown",(e)=>{
 
 function closeKeyboard(){
 
-  if(activeInput === weeks){
-    validateWeeks();
-  }
-  
-  if(activeInput === days){
-    validateDays();
-  }
+  if(activeInput === weeks) validateWeeks();
+  if(activeInput === days) validateDays();
 
   keyboard.classList.add("hidden");
+  activeInput = null;
+  replaceOnInput = false;
 
-  spacer.style.height = "0px";
-  keyboardHeight = 0;
-
-  activeInput=null;
-
+  updateKeyboardSpace();
 }
 
 document.addEventListener("click",(e)=>{
@@ -663,24 +667,6 @@ document.addEventListener("click",(e)=>{
   }
 
 });
-
-if(window.visualViewport){
-
-  const spacer = document.getElementById("bottomSpacer");
-
-  visualViewport.addEventListener("resize", ()=>{
-
-    keyboardHeight = window.innerHeight - visualViewport.height;
-
-    if(keyboardHeight > 0){
-      spacer.style.height = keyboardHeight + "px";
-    }else{
-      spacer.style.height = "0px";
-    }
-
-  });
-
-}
 
 </script>
 <div id="bottomSpacer"></div>
