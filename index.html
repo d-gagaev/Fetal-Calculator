@@ -377,7 +377,47 @@ html{
 </div>
 
 <div id="bottomSpacer"></div>
+<div id="aboutBtn" class="about-btn">
+  ⓘ About
+</div>
 
+<div id="sheetOverlay" class="sheet-overlay hidden"></div>
+
+<div id="bottomSheet" class="bottom-sheet hidden">
+
+  <div class="sheet-handle"></div>
+
+  <div class="sheet-content">
+
+    <div class="sheet-title">About</div>
+
+    <div class="sheet-block">
+      <div class="sheet-subtitle">References</div>
+
+      <a href="https://doi.org/10.1002/uog.22000" target="_blank">
+        Stirnemann J, Salomon LJ, Papageorghiou AT. INTERGROWTH-21st standards for Hadlock's estimation of fetal weight. Ultrasound Obstet Gynecol. 2020;56:946–948.
+      </a>
+
+      <a href="https://doi.org/10.1016/S0140-6736(14)61490-2" target="_blank">
+        Papageorghiou AT, Ohuma EO, Altman DG, et al. International standards for fetal growth based on serial ultrasound measurements: the INTERGROWTH-21st Project. Lancet. 2014;384:869–879.
+      </a>
+
+    </div>
+
+    <div class="sheet-block">
+      <div class="sheet-subtitle">Author</div>
+
+      <a href="https://t.me/gagaev_md" target="_blank">
+        Daniil Gagaev (Telegram)
+      </a>
+    </div>
+
+    <div class="sheet-footer">
+      © 2026 Prenatal Biometry Calculator. All rights reserved.
+    </div>
+
+  </div>
+</div>
 <script>
 function haptic(type="light"){
   if(window.Telegram?.WebApp?.HapticFeedback){
@@ -867,46 +907,5 @@ aboutBtn.addEventListener("pointerdown",(e)=>{
 overlay.addEventListener("pointerdown", closeSheet);
 
 </script>
-<div id="aboutBtn" class="about-btn">
-  ⓘ About
-</div>
-
-<div id="sheetOverlay" class="sheet-overlay hidden"></div>
-
-<div id="bottomSheet" class="bottom-sheet hidden">
-
-  <div class="sheet-handle"></div>
-
-  <div class="sheet-content">
-
-    <div class="sheet-title">About</div>
-
-    <div class="sheet-block">
-      <div class="sheet-subtitle">References</div>
-
-      <a href="https://doi.org/10.1002/uog.22000" target="_blank">
-        Stirnemann J, Salomon LJ, Papageorghiou AT. INTERGROWTH-21st standards for Hadlock's estimation of fetal weight. Ultrasound Obstet Gynecol. 2020;56:946–948.
-      </a>
-
-      <a href="https://doi.org/10.1016/S0140-6736(14)61490-2" target="_blank">
-        Papageorghiou AT, Ohuma EO, Altman DG, et al. International standards for fetal growth based on serial ultrasound measurements: the INTERGROWTH-21st Project. Lancet. 2014;384:869–879.
-      </a>
-
-    </div>
-
-    <div class="sheet-block">
-      <div class="sheet-subtitle">Author</div>
-
-      <a href="https://t.me/gagaev_md" target="_blank">
-        Daniil Gagaev (Telegram)
-      </a>
-    </div>
-
-    <div class="sheet-footer">
-      © 2026 Prenatal Biometry Calculator. All rights reserved.
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
