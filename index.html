@@ -290,6 +290,18 @@ html{
   transform: translateY(0);
 }
 
+body.no-scroll{
+  overflow: hidden;
+}
+
+.bottom-sheet{
+  touch-action: none;
+}
+
+.sheet-handle{
+  touch-action:none;
+}
+
 </style>
 </head>
 
@@ -890,6 +902,8 @@ function openSheet(){
   sheet.classList.remove("hidden");
   overlay.classList.remove("hidden");
 
+  document.body.classList.add("no-scroll"); // ВАЖНО
+
   requestAnimationFrame(()=>{
     sheet.classList.add("open");
   });
@@ -903,6 +917,8 @@ function closeSheet(){
   setTimeout(()=>{
     sheet.classList.add("hidden");
     overlay.classList.add("hidden");
+
+    document.body.classList.remove("no-scroll"); // ВАЖНО
   },300);
 }
 
@@ -920,10 +936,15 @@ let isDragging = false;
 sheet.addEventListener("pointerdown", (e) => {
   isDragging = true;
   startY = e.clientY;
+  currentY = e.clientY;
+
   sheet.style.transition = "none";
+
+  // 🔴 блокируем скролл
+  e.preventDefault();
 });
 
-document.addEventListener("pointermove", (e) => {
+sheet.addEventListener("pointermove", (e) => {
   if (!isDragging) return;
 
   currentY = e.clientY;
@@ -932,9 +953,12 @@ document.addEventListener("pointermove", (e) => {
   if (delta > 0) {
     sheet.style.transform = `translateY(${delta}px)`;
   }
+
+  // 🔴 блокируем скролл страницы
+  e.preventDefault();
 });
 
-document.addEventListener("pointerup", () => {
+sheet.addEventListener("pointerup", () => {
   if (!isDragging) return;
 
   isDragging = false;
@@ -947,6 +971,10 @@ document.addEventListener("pointerup", () => {
   } else {
     sheet.style.transform = "translateY(0)";
   }
+});
+
+sheet.addEventListener("pointercancel", () => {
+  isDragging = false;
 });
 
 </script>
