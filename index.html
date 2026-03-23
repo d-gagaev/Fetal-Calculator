@@ -281,10 +281,6 @@ html{
   display:none;
 }
 
-#bottomSheet{
-  background:red;
-}
-
 </style>
 </head>
 
@@ -867,10 +863,12 @@ resetBtn.addEventListener("pointerdown",(e)=>{
 document.addEventListener("pointerdown",(e)=>{
   if(!isMobile) return;
 
-  const clickedInput=inputs.includes(e.target);
-  const clickedKeyboard=keyboard.contains(e.target);
+  const clickedInput = inputs.includes(e.target);
+  const clickedKeyboard = keyboard.contains(e.target);
+  const clickedAbout = aboutBtn.contains(e.target);
+  const clickedSheet = sheet.contains(e.target);
 
-  if(!clickedInput && !clickedKeyboard){
+  if(!clickedInput && !clickedKeyboard && !clickedAbout && !clickedSheet){
     closeKeyboard();
   }
 });
