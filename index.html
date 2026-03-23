@@ -290,8 +290,18 @@ html{
   transform: translateY(0);
 }
 
+#bottomSheet{
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
 body.no-scroll{
   overflow: hidden;
+}
+
+.no-scroll{
+  overflow:hidden;
+  height:100vh;
 }
 
 .bottom-sheet{
@@ -902,7 +912,7 @@ function openSheet(){
   sheet.classList.remove("hidden");
   overlay.classList.remove("hidden");
 
-  document.body.classList.add("no-scroll"); // ВАЖНО
+  document.body.classList.add("no-scroll");
 
   requestAnimationFrame(()=>{
     sheet.classList.add("open");
@@ -918,7 +928,7 @@ function closeSheet(){
     sheet.classList.add("hidden");
     overlay.classList.add("hidden");
 
-    document.body.classList.remove("no-scroll"); // ВАЖНО
+    document.body.classList.remove("no-scroll"); 
   },300);
 }
 
@@ -933,48 +943,34 @@ let startY = 0;
 let currentY = 0;
 let isDragging = false;
 
-sheet.addEventListener("pointerdown", (e) => {
+sheet.addEventListener("touchstart",(e)=>{
+  startY = e.touches[0].clientY;
   isDragging = true;
-  startY = e.clientY;
-  currentY = e.clientY;
-
-  sheet.style.transition = "none";
-
-  // 🔴 блокируем скролл
-  e.preventDefault();
 });
 
-sheet.addEventListener("pointermove", (e) => {
-  if (!isDragging) return;
+sheet.addEventListener("touchmove",(e)=>{
+  if(!isDragging) return;
 
-  currentY = e.clientY;
-  let delta = currentY - startY;
+  currentY = e.touches[0].clientY;
+  const delta = currentY - startY;
 
-  if (delta > 0) {
+  if(delta > 0){ // только вниз
+    e.preventDefault(); // 👈 БЛОК СКРОЛЛА СТРАНИЦЫ
+
     sheet.style.transform = `translateY(${delta}px)`;
   }
+}, { passive:false });
 
-  // 🔴 блокируем скролл страницы
-  e.preventDefault();
-});
-
-sheet.addEventListener("pointerup", () => {
-  if (!isDragging) return;
-
+sheet.addEventListener("touchend",()=>{
   isDragging = false;
-  sheet.style.transition = "transform 0.3s ease";
 
-  let delta = currentY - startY;
+  const delta = currentY - startY;
 
-  if (delta > 120) {
+  if(delta > 100){
     closeSheet();
-  } else {
-    sheet.style.transform = "translateY(0)";
+  }else{
+    sheet.style.transform = "";
   }
-});
-
-sheet.addEventListener("pointercancel", () => {
-  isDragging = false;
 });
 
 </script>
