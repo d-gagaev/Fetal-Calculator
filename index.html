@@ -739,7 +739,10 @@ function ensureVisible(input){
 
 function setActiveField(input){
   inputs.forEach(i => i.classList.remove("active-field"));
-  if(input) input.classList.add("active-field");
+
+  if(input){
+    input.classList.add("active-field");
+  }
 }
 
 function openKeyboard(input){
@@ -856,6 +859,7 @@ nextBtn.addEventListener("pointerdown",(e)=>{
   if(index<inputs.length-1){
     const nextInput = inputs[index+1];
 
+    setActiveField(null); // сначала сброс
     activeInput = nextInput;
     replaceOnInput = nextInput.value.length > 0;
     setActiveField(nextInput);
@@ -888,10 +892,13 @@ resetBtn.addEventListener("pointerdown",(e)=>{
 
   haptic("medium");
 
-  // очищаем все поля
+  // очищаем вводимые поля
   inputs.forEach(i=>{
     i.value = "";
   });
+
+  // ❗ очищаем автоматически рассчитанный EFW
+  efw.value = "";
 
   // очищаем результаты
   document.querySelectorAll(".result").forEach(r=>{
@@ -903,10 +910,12 @@ resetBtn.addEventListener("pointerdown",(e)=>{
   replaceOnInput = false;
   setActiveField(null);
 
-  // закрываем клавиатуру (если была открыта)
   closeKeyboard();
 
-  // делаем активным weeks
+  // пересчитать (чтобы точно всё обнулилось)
+  analyze();
+
+  // фокус обратно на weeks
   setTimeout(()=>{
     openKeyboard(weeks);
   },50);
