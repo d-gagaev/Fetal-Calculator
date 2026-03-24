@@ -232,14 +232,6 @@ html{
   transform:translateY(0);
 }
 
-.sheet-handle{
-  width:40px;
-  height:4px;
-  background:#d1d5db;
-  border-radius:2px;
-  margin:10px auto;
-}
-
 .sheet-content{
   padding:16px 20px 24px;
   max-height:60vh;
@@ -305,6 +297,31 @@ html{
   will-change: transform;
 }
 
+#bottomSheet{
+  position: fixed; /* на всякий случай */
+}
+
+.close-sheet{
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1e3a8a;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.close-sheet:active{
+  transform: scale(0.9);
+  opacity: 0.6;
+}
+
 body.no-scroll{
   overflow: hidden;
 }
@@ -316,10 +333,6 @@ body.no-scroll{
 
 .bottom-sheet{
   touch-action: none;
-}
-
-.sheet-handle{
-  touch-action:none;
 }
 
 </style>
@@ -420,9 +433,9 @@ body.no-scroll{
 
 <div id="sheetOverlay" class="sheet-overlay hidden"></div>
 
-<div id="bottomSheet" class="bottom-sheet hidden">
-
-  <div class="sheet-handle"></div>
+<div id="bottomSheet" class="hidden">
+  
+  <button id="closeSheetBtn" class="close-sheet">✕</button>
 
   <div class="sheet-content">
 
@@ -917,6 +930,7 @@ document.addEventListener("pointerdown",(e)=>{
 const aboutBtn = document.getElementById("aboutBtn");
 const sheet = document.getElementById("bottomSheet");
 const overlay = document.getElementById("sheetOverlay");
+const closeSheetBtn = document.getElementById("closeSheetBtn");
 
 function openSheet(){
   sheet.classList.remove("hidden");
@@ -945,6 +959,11 @@ function closeSheet(){
 aboutBtn.addEventListener("pointerdown",(e)=>{
   e.preventDefault();
   openSheet();
+});
+
+closeSheetBtn.addEventListener("pointerdown", (e)=>{
+  e.preventDefault();
+  closeSheet();
 });
 
 overlay.addEventListener("pointerdown", closeSheet);
