@@ -279,10 +279,6 @@ html{
   opacity:0.6;
 }
 
-.hidden{
-  display:none;
-}
-
 #bottomSheet{
   transform: translateY(100%);
   transition: transform 0.3s ease;
@@ -433,7 +429,7 @@ body.no-scroll{
 
 <div id="sheetOverlay" class="sheet-overlay hidden"></div>
 
-<div id="bottomSheet" class="hidden">
+<div id="bottomSheet" class="bottom-sheet hidden">
   
   <button id="closeSheetBtn" class="close-sheet">✕</button>
 
@@ -675,6 +671,12 @@ let activeInput=null;
 let replaceOnInput=false;
 
 const keyboard=document.getElementById("customKeyboard");
+
+const aboutBtn = document.getElementById("aboutBtn");
+const sheet = document.getElementById("bottomSheet");
+const overlay = document.getElementById("sheetOverlay");
+const closeSheetBtn = document.getElementById("closeSheetBtn");
+
 ["touchstart","touchmove","touchend"].forEach(eventName=>{
   keyboard.addEventListener(eventName,(e)=>{
     e.preventDefault();
@@ -927,10 +929,6 @@ document.addEventListener("pointerdown",(e)=>{
   }
 });
 
-const aboutBtn = document.getElementById("aboutBtn");
-const sheet = document.getElementById("bottomSheet");
-const overlay = document.getElementById("sheetOverlay");
-const closeSheetBtn = document.getElementById("closeSheetBtn");
 
 function openSheet(){
   sheet.classList.remove("hidden");
