@@ -327,10 +327,6 @@ body.no-scroll{
   height:100vh;
 }
 
-.bottom-sheet{
-  touch-action: none;
-}
-
 </style>
 </head>
 
@@ -965,40 +961,6 @@ closeSheetBtn.addEventListener("pointerdown", (e)=>{
 });
 
 overlay.addEventListener("pointerdown", closeSheet);
-
-let startY = 0;
-let currentY = 0;
-let isDragging = false;
-
-sheet.addEventListener("touchstart",(e)=>{
-  startY = e.touches[0].clientY;
-  isDragging = true;
-});
-
-sheet.addEventListener("touchmove",(e)=>{
-  if(!isDragging) return;
-
-  currentY = e.touches[0].clientY;
-  const delta = currentY - startY;
-
-  if(delta > 0){ // только вниз
-    e.preventDefault(); // 👈 БЛОК СКРОЛЛА СТРАНИЦЫ
-
-    sheet.style.transform = `translateY(${delta}px)`;
-  }
-}, { passive:false });
-
-sheet.addEventListener("touchend",()=>{
-  isDragging = false;
-
-  const delta = currentY - startY;
-
-  if(delta > 100){
-    closeSheet();
-  }else{
-    sheet.style.transform = "";
-  }
-});
 
 </script>
 </body>
