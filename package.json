@@ -1,0 +1,17 @@
+{
+  "name": "fetal-calculator",
+  "version": "1.0.0",
+  "description": "Prenatal Biometry Calculator",
+  "type": "module",
+  "scripts": {
+    "dev": "npx vite",
+    "build": "npx vite build",
+    "preview": "npx vite preview"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
