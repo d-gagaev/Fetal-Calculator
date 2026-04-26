@@ -696,8 +696,6 @@ function whoPercentile(value, table, g){
       }
     }
   }
-  if (alpha < 0.025) return { p: null, z: null, label: "<2.5p" };
-  if (alpha > 0.975) return { p: null, z: null, label: ">97.5p" };
   return { p: +(alpha*100).toFixed(2), z: probit(alpha), label: null };
 }
 
