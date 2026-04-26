@@ -787,6 +787,17 @@ function analyze(){
 document.querySelectorAll("input")
 .forEach(i=>i.addEventListener("input",analyze));
 
+let currentSex = "";
+document.querySelectorAll(".sex-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    haptic("light");
+    document.querySelectorAll(".sex-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentSex = btn.dataset.sex;
+    analyze();
+  });
+});
+
 /* ===============================
    KEYBOARD
 ================================ */
