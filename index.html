@@ -84,9 +84,9 @@ label{
 }
 
 .result{
-  flex:0 0 120px;
+  flex:0 0 140px;
   text-align:right;
-  font-size:14px;
+  font-size:13px;
   font-weight:500;
   color:var(--text-soft);
   position:relative;
@@ -94,9 +94,65 @@ label{
   word-break:break-word;
 }
 
+.result .ln{
+  font-size:12.5px;
+  font-weight:500;
+  line-height:1.55;
+  color:var(--text-soft);
+  white-space:nowrap;
+}
+
+.result .src{
+  display:inline-block;
+  min-width:28px;
+  font-size:10px;
+  opacity:0.55;
+  letter-spacing:0.3px;
+  text-align:left;
+  margin-right:2px;
+}
+
+.result .z{
+  font-size:10.5px;
+  opacity:0.7;
+  margin-left:4px;
+}
+
+.result .ln.red{ color:var(--path-red); }
+.result .ln.yellow{ color:var(--path-yellow); }
+.result .ln.orange{ color:var(--path-orange); }
+.result .ln.muted{ color:var(--text-soft); opacity:0.5; }
+
 .result.red{ color:var(--path-red); }
 .result.yellow{ color:var(--path-yellow); }
 .result.orange{ color:var(--path-orange); }
+
+.sex-row{
+  display:flex;
+  gap:8px;
+}
+
+.sex-btn{
+  flex:1;
+  height:40px;
+  border:1px solid var(--fmf-border);
+  border-radius:10px;
+  background:#ffffff;
+  color:#374151;
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.2px;
+}
+
+.sex-btn.active{
+  background:var(--fmf-blue);
+  color:#ffffff;
+  border-color:var(--fmf-blue);
+}
+
+.sex-btn:active{
+  transform:scale(0.98);
+}
 
 .divider{
   height:1px;
@@ -348,6 +404,15 @@ body.no-scroll{
 <div class="row">
 <input id="weeks" type="text" placeholder="Weeks (14–41)" min="14" max="41" readonly>
 <input id="days" type="text" placeholder="Days" min="0" max="6" readonly>
+</div>
+</div>
+
+<div class="section">
+<label>Fetal sex (for WHO EFW)</label>
+<div class="sex-row">
+<button type="button" data-sex="" class="sex-btn active">Unspecified</button>
+<button type="button" data-sex="F" class="sex-btn">♀ Female</button>
+<button type="button" data-sex="M" class="sex-btn">♂ Male</button>
 </div>
 </div>
 
