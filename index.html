@@ -743,54 +743,58 @@ function paintDual(box, ig, who){
 }
 
 function analyze(){
-  const w=parseInt(weeks.value);
-  const d=parseInt(days.value)||0;
+  const w = parseInt(weeks.value);
+  const d = parseInt(days.value) || 0;
+  let g = null;
+  if (!isNaN(w)) g = gaInWeeks(w, d);
 
-  let g=null;
-
-  if(!isNaN(w)){
-    g=gaInWeeks(w,d);
+  function igRes(val, meanFn, sdFn){
+    if (!val || !g) return null;
+    const z = (val - meanFn(g)) / sdFn(g);
+    return { p: percentile(z), z };
+  }
+  function whoRes(val, table){
+    if (!val || !g) return null;
+    return whoPercentile(val, table, g);
   }
 
-  function compute(val,meanFn,sdFn,res){
-    if(!val || !g){
-      res.innerText="";
-      return;
-    }
+  const bpdV = parseFloat(bpd.value);
+  paintDual(bpd_res, igRes(bpdV, meanBPD, sdBPD), whoRes(bpdV, WHO_GLOBAL.BPD));
 
-    const z=(val-meanFn(g))/sdFn(g);
-    paint(res,percentile(z),z);
-  }
+  const hcV = parseFloat(hc.value);
+  paintDual(hc_res, igRes(hcV, meanHC, sdHC), whoRes(hcV, WHO_GLOBAL.HC));
 
-  compute(parseFloat(bpd.value),meanBPD,sdBPD,bpd_res);
-  compute(parseFloat(hc.value),meanHC,sdHC,hc_res);
-  compute(parseFloat(ac.value),meanAC,sdAC,ac_res);
-  compute(parseFloat(fl.value),meanFL,sdFL,fl_res);
+  const acV = parseFloat(ac.value);
+  paintDual(ac_res, igRes(acV, meanAC, sdAC), whoRes(acV, WHO_GLOBAL.AC));
+
+  const flV = parseFloat(fl.value);
+  paintDual(fl_res, igRes(flV, meanFL, sdFL), whoRes(flV, WHO_GLOBAL.FL));
 
   const HC = parseFloat(hc.value);
   const AC = parseFloat(ac.value);
   const FL = parseFloat(fl.value);
+  const efwTable = currentSex ? WHO_EFW_SEX[currentSex] : WHO_GLOBAL.EFW;
 
-  if(HC && AC && FL){
+  if (HC && AC && FL){
     const efwValue = calculateEFW_Hadlock3(HC, AC, FL);
     efw.value = efwValue;
-
-    if(g){
-      const z = zEFW(efwValue,g);
-      paint(efw_res,percentile(z),z);
+    if (g){
+      const z = zEFW(efwValue, g);
+      const ig = isFinite(z) ? { p: percentile(z), z } : null;
+      paintDual(efw_res, ig, whoPercentile(efwValue, efwTable, g));
     }
-  }else{
+  } else {
     efw.value = "";
-    efw_res.innerText = "";
+    efw_res.innerHTML = "";
   }
 
-  const manual=parseFloat(efw_manual.value);
-
-  if(manual>0 && g){
-    const z=zEFW(manual,g);
-    paint(efw_manual_res,percentile(z),z);
-  }else{
-    efw_manual_res.innerText="";
+  const manual = parseFloat(efw_manual.value);
+  if (manual > 0 && g){
+    const z = zEFW(manual, g);
+    const ig = isFinite(z) ? { p: percentile(z), z } : null;
+    paintDual(efw_manual_res, ig, whoPercentile(manual, efwTable, g));
+  } else {
+    efw_manual_res.innerHTML = "";
   }
 }
 
