@@ -717,19 +717,29 @@ function validateDays(){
   days.dispatchEvent(new Event("input"));
 }
 
-function paint(box,p,z){
-  box.className="result";
+function colorFor(p){
+  if (p == null || !isFinite(p)) return "";
+  if (p < 3)  return "red";
+  if (p < 10) return "yellow";
+  if (p > 90) return "orange";
+  return "";
+}
 
-  if(p<3) box.classList.add("red");
-  else if(p<10) box.classList.add("yellow");
-  else if(p>90) box.classList.add("orange");
+function fmtLine(label, res){
+  if (!res) return `<div class="ln muted"><span class="src">${label}</span>—</div>`;
+  if (res.label) {
+    const cls = res.label.startsWith("<") ? "red" : "orange";
+    return `<div class="ln ${cls}"><span class="src">${label}</span>${res.label}</div>`;
+  }
+  const cls = colorFor(res.p);
+  const z = isFinite(res.z) ? res.z.toFixed(2) : "—";
+  return `<div class="ln ${cls}"><span class="src">${label}</span>${res.p}p <span class="z">z=${z}</span></div>`;
+}
 
-  const zText = isFinite(z) ? z.toFixed(2) : "—";
-
-  box.innerHTML = `
-    <div>${p} percentile</div>
-    <div class="zscore">z = ${zText}</div>
-  `;
+function paintDual(box, ig, who){
+  box.className = "result";
+  if (!ig && !who){ box.innerHTML = ""; return; }
+  box.innerHTML = fmtLine("IG", ig) + fmtLine("WHO", who);
 }
 
 function analyze(){
