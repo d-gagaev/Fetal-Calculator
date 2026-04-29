@@ -821,14 +821,6 @@ body.no-scroll{ overflow: hidden; }
 
 <script>
 /* ===============================
-   Safe defaults: позволяют файлу
-   работать и без who-data.js
-================================ */
-if (typeof WHO_QUANTILES === 'undefined') var WHO_QUANTILES = [];
-if (typeof WHO_GLOBAL    === 'undefined') var WHO_GLOBAL    = {BPD:null,HC:null,AC:null,FL:null,EFW:null};
-if (typeof WHO_EFW_SEX   === 'undefined') var WHO_EFW_SEX   = {F:null,M:null};
-
-/* ===============================
    Telegram WebApp: фиксируем светлую тему
    (иначе при тёмной теме клиента
    фон/хедер/инпуты уходят в dark)
