@@ -30,6 +30,8 @@
 html, body{
   color-scheme: light;
   background:#ffffff;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 body{
@@ -366,6 +368,8 @@ body.no-scroll{ overflow: hidden; }
   background:#f5f7fa;
   z-index:100;
   overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
   transform:translateX(100%);
   transition:transform 0.3s ease;
@@ -1388,18 +1392,46 @@ overlay.addEventListener("pointerdown", closeSheet);
   mcaDaysEl.value  = "0";
 })();
 
+// Сохранённая позиция скролла биометрии, чтобы вернуться туда же
+let savedScrollY = 0;
+
 function openMcaPage(){
   closeKeyboard();
+
+  // Замораживаем биометрию на её текущей scroll-позиции,
+  // чтобы при закрытии mca она не "прилипала" к началу/концу.
+  savedScrollY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${savedScrollY}px`;
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+
   mcaPage.classList.add("active");
   mcaPage.setAttribute("aria-hidden","false");
-  document.body.classList.add("no-scroll");
+  mcaPage.scrollTop = 0;
+
+  // На случай Telegram WebApp — отключаем системный swipe-to-close,
+  // иначе он конфликтует с горизонтальным свайпом и "сдвигает" контент.
+  try { window.Telegram?.WebApp?.disableVerticalSwipes?.(); } catch(_) {}
+
   haptic("light");
 }
 
 function closeMcaPage(){
   mcaPage.classList.remove("active");
   mcaPage.setAttribute("aria-hidden","true");
-  document.body.classList.remove("no-scroll");
+
+  // Размораживаем биометрию и возвращаемся к сохранённой позиции
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  window.scrollTo(0, savedScrollY);
+
+  try { window.Telegram?.WebApp?.enableVerticalSwipes?.(); } catch(_) {}
+
   haptic("light");
 }
 
@@ -1613,6 +1645,8 @@ function drawMcaChart(r){
 
 (function initSwipe(){
   let sx = 0, sy = 0, dir = null, tracking = false;
+  const MIN_DIST = 80;        // минимальный горизонтальный сдвиг
+  const MAX_OFF_AXIS = 60;    // допустимое отклонение по вертикали
 
   function onStart(e){
     if (e.touches.length !== 1) return;
@@ -1620,7 +1654,10 @@ function drawMcaChart(r){
     // Игнорируем жесты внутри клавиатуры, шита, инпутов и кнопок
     if (t.closest("#customKeyboard") ||
         t.closest("#bottomSheet")    ||
-        t.closest("input, select, textarea, button")) return;
+        t.closest("input, select, textarea, button")) {
+      tracking = false;
+      return;
+    }
 
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
@@ -1633,18 +1670,21 @@ function drawMcaChart(r){
     if (dir === "vertical") return;
     const dx = e.touches[0].clientX - sx;
     const dy = e.touches[0].clientY - sy;
-    if (dir === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)){
+    if (dir === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)){
       dir = Math.abs(dx) > Math.abs(dy) ? "horizontal" : "vertical";
     }
   }
 
   function onEnd(e){
-    if (!tracking) return;
+    if (!tracking){ return; }
     tracking = false;
     if (dir !== "horizontal") return;
 
     const dx = e.changedTouches[0].clientX - sx;
-    if (Math.abs(dx) < 60) return;
+    const dy = e.changedTouches[0].clientY - sy;
+
+    if (Math.abs(dx) < MIN_DIST) return;
+    if (Math.abs(dy) > MAX_OFF_AXIS) return;
 
     const isOpen = mcaPage.classList.contains("active");
     if (dx < 0 && !isOpen)      openMcaPage();
@@ -1654,6 +1694,7 @@ function drawMcaChart(r){
   document.addEventListener("touchstart", onStart, { passive:true });
   document.addEventListener("touchmove",  onMove,  { passive:true });
   document.addEventListener("touchend",   onEnd,   { passive:true });
+  document.addEventListener("touchcancel",()=>{ tracking = false; }, { passive:true });
 })();
 
 </script>
