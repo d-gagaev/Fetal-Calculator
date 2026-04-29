@@ -821,13 +821,29 @@ body.no-scroll{ overflow: hidden; }
 
 <script>
 /* ===============================
+   Определяем, реально ли мы запущены
+   внутри Telegram-клиента (а не просто
+   в обычном Safari/Chrome).
+   В обычном браузере Telegram-методы
+   шумят "Script error." из cross-origin SDK.
+================================ */
+function isInTelegram(){
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (!tg) return false;
+  if (tg.initData && tg.initData.length > 0) return true;
+  if (tg.platform && tg.platform !== "unknown") return true;
+  return false;
+}
+
+/* ===============================
    Telegram WebApp: фиксируем светлую тему
-   (иначе при тёмной теме клиента
-   фон/хедер/инпуты уходят в dark)
+   (только если мы действительно в Telegram —
+   в обычном браузере color-scheme:light
+   и meta theme-color уже сделали своё дело)
 ================================ */
 (function lockLightTheme(){
-  const tg = window.Telegram?.WebApp;
-  if (!tg) return;
+  if (!isInTelegram()) return;
+  const tg = window.Telegram.WebApp;
   try { tg.ready(); } catch(_) {}
   try { tg.expand(); } catch(_) {}
   try { tg.setHeaderColor && tg.setHeaderColor("#ffffff"); } catch(_) {}
@@ -836,17 +852,20 @@ body.no-scroll{ overflow: hidden; }
 })();
 
 function haptic(type="light"){
-  if(window.Telegram?.WebApp?.HapticFeedback){
-    if(type==="light") Telegram.WebApp.HapticFeedback.impactOccurred("light");
-    if(type==="medium") Telegram.WebApp.HapticFeedback.impactOccurred("medium");
-    if(type==="heavy") Telegram.WebApp.HapticFeedback.impactOccurred("heavy");
+  if(isInTelegram() && window.Telegram.WebApp.HapticFeedback){
+    const hf = window.Telegram.WebApp.HapticFeedback;
+    try {
+      if(type==="light")  hf.impactOccurred("light");
+      if(type==="medium") hf.impactOccurred("medium");
+      if(type==="heavy")  hf.impactOccurred("heavy");
+    } catch(_){}
     return;
   }
 
   if(navigator.vibrate){
-    if(type==="light") navigator.vibrate(10);
+    if(type==="light")  navigator.vibrate(10);
     if(type==="medium") navigator.vibrate(20);
-    if(type==="heavy") navigator.vibrate(30);
+    if(type==="heavy")  navigator.vibrate(30);
   }
 }
 
@@ -1104,6 +1123,31 @@ function analyze(){
 document.querySelectorAll("input")
 .forEach(i=>i.addEventListener("input",analyze));
 
+/* =========================================================
+   Синхронизация срока беременности между страницами
+========================================================= */
+
+// Биометрия → MCA-страница.
+// Срок MCA-калькулятора жёстко ограничен 16–40 нед,
+// поэтому значения биометрии (14–41) клампим в этот диапазон.
+function syncGaToMca(){
+  if (typeof mcaWeeksEl === "undefined" || !mcaWeeksEl) return;
+  const w = parseInt(weeks.value, 10);
+  const d = parseInt(days.value, 10);
+  if (Number.isFinite(w)){
+    let wc = w;
+    if (wc < 16) wc = 16;
+    if (wc > 40) wc = 40;
+    mcaWeeksEl.value = String(wc);
+  }
+  if (Number.isFinite(d) && d >= 0 && d <= 6){
+    mcaDaysEl.value = String(d);
+  }
+}
+
+weeks.addEventListener("input", syncGaToMca);
+days.addEventListener ("input", syncGaToMca);
+
 let currentSex = "";
 document.querySelectorAll(".sex-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -1309,6 +1353,18 @@ resetBtn.addEventListener("pointerdown",(e)=>{
 
   document.querySelectorAll(".result").forEach(r=>{ r.innerHTML = ""; });
 
+  // Сбрасываем и MCA-страницу: дефолтный срок, очищенный PSV, скрытые результаты
+  const _mw = document.getElementById("mcaWeeks");
+  const _md = document.getElementById("mcaDays");
+  const _mp = document.getElementById("mcaPsv");
+  const _mr = document.getElementById("mcaResults");
+  const _me = document.getElementById("mcaError");
+  if (_mw) _mw.value = "28";
+  if (_md) _md.value = "0";
+  if (_mp) _mp.value = "";
+  if (_mr) _mr.classList.remove("show");
+  if (_me) _me.hidden = true;
+
   activeInput = null;
   replaceOnInput = false;
   setActiveField(null);
@@ -1388,11 +1444,28 @@ overlay.addEventListener("pointerdown", closeSheet);
   mcaDaysEl.value  = "0";
 })();
 
+// MCA-страница → биометрия.
+// Не трогаем биометрию, если её поля пустые и пользователь
+// ещё не вводил срок (не навязываем 28 нед автоматически).
+function syncGaFromMca(){
+  const w = parseInt(mcaWeeksEl.value, 10);
+  const d = parseInt(mcaDaysEl.value, 10);
+  if (Number.isFinite(w)) weeks.value = String(w);
+  if (Number.isFinite(d)) days.value  = String(d);
+  analyze();
+}
+
+mcaWeeksEl.addEventListener("change", syncGaFromMca);
+mcaDaysEl.addEventListener ("change", syncGaFromMca);
+
 // Сохранённая позиция скролла биометрии, чтобы вернуться туда же
 let savedScrollY = 0;
 
 function openMcaPage(){
   closeKeyboard();
+
+  // Подтягиваем актуальный срок из биометрии, если он там введён
+  syncGaToMca();
 
   // Замораживаем биометрию на её текущей scroll-позиции,
   // чтобы при закрытии mca она не "прилипала" к началу/концу.
@@ -1409,7 +1482,9 @@ function openMcaPage(){
 
   // На случай Telegram WebApp — отключаем системный swipe-to-close,
   // иначе он конфликтует с горизонтальным свайпом и "сдвигает" контент.
-  try { window.Telegram?.WebApp?.disableVerticalSwipes?.(); } catch(_) {}
+  if (isInTelegram()) {
+    try { window.Telegram.WebApp.disableVerticalSwipes && window.Telegram.WebApp.disableVerticalSwipes(); } catch(_) {}
+  }
 
   haptic("light");
 }
@@ -1426,7 +1501,9 @@ function closeMcaPage(){
   document.body.style.width = "";
   window.scrollTo(0, savedScrollY);
 
-  try { window.Telegram?.WebApp?.enableVerticalSwipes?.(); } catch(_) {}
+  if (isInTelegram()) {
+    try { window.Telegram.WebApp.enableVerticalSwipes && window.Telegram.WebApp.enableVerticalSwipes(); } catch(_) {}
+  }
 
   haptic("light");
 }
@@ -1435,7 +1512,7 @@ anemiaBtn.addEventListener("click", openMcaPage);
 mcaBackBtn.addEventListener("click", closeMcaPage);
 
 // Telegram WebApp BackButton — закрывает MCA-страницу системной кнопкой
-if (window.Telegram?.WebApp?.BackButton){
+if (isInTelegram() && window.Telegram.WebApp.BackButton){
   const tg = window.Telegram.WebApp;
   tg.BackButton.onClick(()=>{
     if (mcaPage.classList.contains("active")) closeMcaPage();
